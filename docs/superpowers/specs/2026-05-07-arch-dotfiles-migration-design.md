@@ -14,7 +14,8 @@ Turn this `dotfiles` repository into a self-contained, idempotent reproduction o
 In scope:
 
 - All actively used `~/.config/` configurations (Hyprland, Waybar, Alacritty, Ghostty, Rofi, Fontconfig, Git, GTK, mimeapps, etc.)
-- Shell rcfiles (`.bashrc`, `.bash_profile`, `.zshrc`, `.gitconfig`, `.npmrc`, `.asoundrc`)
+- Shell rcfiles: `.bashrc`, `.bash_profile`, `.zshrc`, `.npmrc`, `.asoundrc`
+- Git config: `.gitconfig` (stored as a template, see §6) and `~/.config/git/ignore`
 - Package lists: official (pacman) + AUR (yay)
 - Enabled systemd services (system + user)
 - Modified `/etc` files (currently: `pacman.conf`)
@@ -78,11 +79,11 @@ dotfiles/
 │   ├── .bashrc
 │   ├── .bash_profile
 │   ├── .zshrc                   # no secrets; sources ~/.env.local
-│   └── .npmrc
+│   ├── .npmrc
 │   └── .asoundrc
 │
 ├── git/                         # Stow → $HOME and $HOME/.config/git
-│   ├── .gitconfig.tmpl          # template with {{GIT_USER_NAME}} etc.
+│   ├── .gitconfig.tmpl          # template with ${GIT_USER_NAME} placeholders (envsubst)
 │   └── .config/git/ignore
 │
 ├── hyprland/                    # Stow → ~/.config/hypr/
@@ -91,7 +92,13 @@ dotfiles/
 ├── ghostty/                     # Stow → ~/.config/ghostty/
 ├── rofi/                        # Stow → ~/.config/rofi/
 ├── fontconfig/                  # Stow → ~/.config/fontconfig/
-├── desktop/                     # Stow → ~/.config/{gtk-3.0,mimeapps.list,xdg-terminals.list,yay,dconf}/
+├── desktop/                     # Stow → ~/.config/ (multiple targets)
+│   └── .config/
+│       ├── gtk-3.0/
+│       ├── mimeapps.list
+│       ├── xdg-terminals.list
+│       ├── yay/
+│       └── dconf/
 │
 ├── env/
 │   └── .env.example             # placeholder keys, value empty
@@ -135,7 +142,7 @@ Mechanism:
   ```
 - `env/.env.example` (committed) lists the keys with empty values.
 - `~/.env.local` (gitignored, **never** in repo) holds real values. User copies the example and fills it in on the new machine.
-- `git/.gitconfig.tmpl` is a committed template; `scripts/render-templates.sh` runs `envsubst` against it (consuming env vars or `~/.env.local`) and writes the rendered `~/.gitconfig`. The rendered file is gitignored.
+- `git/.gitconfig.tmpl` is a committed template using `${VAR}` placeholders (e.g. `${GIT_USER_NAME}`, `${GIT_USER_EMAIL}`). `scripts/render-templates.sh` sources `~/.env.local` and runs `envsubst` to write `~/.gitconfig`. The rendered file and the source `${VAR}` keys live in `~/.env.local`; both are gitignored.
 
 ## 7. Bootstrap flow
 
