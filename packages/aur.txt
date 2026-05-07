@@ -1,0 +1,5 @@
+google-chrome
+visual-studio-code-bin
+whisper.cpp
+yay
+yay-debug

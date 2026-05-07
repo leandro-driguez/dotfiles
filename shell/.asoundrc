@@ -1,0 +1,28 @@
+# Force every ALSA path to PipeWire. PipeWire holds exclusive control of
+# the hardware (hw:0,0), so the dsnoop/dmix plugins fail to open their
+# slave. Routing them through PipeWire instead avoids the failure.
+
+pcm.!default {
+    type pipewire
+    hint { show on description "Default ALSA via PipeWire" }
+}
+
+ctl.!default {
+    type pipewire
+}
+
+# Override dsnoop and dmix to bypass hw:* and go straight to PipeWire.
+# These are parameterized in alsa-lib; use !name to force-replace.
+pcm.!dsnoop {
+    @args [ CARD ]
+    @args.CARD { type string default "0" }
+    type pipewire
+    capture_node "-1"
+}
+
+pcm.!dmix {
+    @args [ CARD ]
+    @args.CARD { type string default "0" }
+    type pipewire
+    playback_node "-1"
+}
